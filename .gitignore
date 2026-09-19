@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Собранные бинарники примеров
+examples/*.exe
+examples/привет_elf
+
+# Прочее
+SETUP_LOG.md.tmp

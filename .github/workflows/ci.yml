@@ -1,0 +1,49 @@
+# CI: автопроверки и реальный запуск собранных бинарников
+name: CI Checks
+
+on:
+  push:
+    branches: [main, develop, "feature/*"]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install black flake8 flake8-pyproject pytest
+      - name: Run checks
+        run: |
+          python -m black --check src tests
+          python -m flake8 src tests
+          python -m pytest tests
+      - name: Build and run PE example
+        run: |
+          python -m src.asm_rus examples/привет.асм -o привет.exe
+          ./привет.exe
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install black flake8 flake8-pyproject pytest
+      - name: Run checks
+        run: |
+          python -m black --check src tests
+          python -m flake8 src tests
+          python -m pytest tests
+      - name: Build and run ELF example
+        run: |
+          python -m src.asm_rus examples/привет_linux.асм --цель linux -o привет
+          chmod +x привет && ./привет
