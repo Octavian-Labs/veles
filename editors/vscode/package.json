@@ -1,0 +1,80 @@
+{
+  "name": "veles-languages",
+  "displayName": "ВЕЛЕС — ИСКРА/РАЗУМ/ЯР",
+  "description": "Подсветка синтаксиса для языков экосистемы ВЕЛЕС: ИСКРА (.иск, русский ассемблер x86-64), РАЗУМ (.раз, системный язык), ЯР (.яр, флагманский язык).",
+  "version": "0.1.0",
+  "publisher": "veles",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "veles",
+    "iskra",
+    "razum",
+    "yar",
+    "искра",
+    "разум",
+    "яр",
+    "велес"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "iskra",
+        "aliases": [
+          "ИСКРА",
+          "iskra",
+          "Iskra"
+        ],
+        "extensions": [
+          ".иск"
+        ],
+        "configuration": "./language-configuration.iskra.json"
+      },
+      {
+        "id": "razum",
+        "aliases": [
+          "РАЗУМ",
+          "razum",
+          "Razum"
+        ],
+        "extensions": [
+          ".раз"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "yar",
+        "aliases": [
+          "ЯР",
+          "yar",
+          "Yar"
+        ],
+        "extensions": [
+          ".яр"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "iskra",
+        "scopeName": "source.iskra",
+        "path": "./syntaxes/iskra.tmLanguage.json"
+      },
+      {
+        "language": "razum",
+        "scopeName": "source.razum",
+        "path": "./syntaxes/razum.tmLanguage.json"
+      },
+      {
+        "language": "yar",
+        "scopeName": "source.yar",
+        "path": "./syntaxes/yar.tmLanguage.json"
+      }
+    ]
+  }
+}

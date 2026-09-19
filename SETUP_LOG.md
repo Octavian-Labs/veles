@@ -180,3 +180,19 @@ cd src; python -m iskra ..\examples\привет.иск -o ..\examples\прив�
   `ввод_демо.раз` (stdin → длина).
 
 **Автопроверки:** `black --check` ✓ `flake8` ✓ `pytest` 84 passed, 1 skipped.
+
+## 2026-09-19 — Расширение VSCode: подсветка ИСКРА/РАЗУМ/ЯР
+
+**Цель:** TextMate-грамматики и манифест расширения `veles-languages`.
+
+**Выполнено:**
+- `editors/vscode/`: package.json (publisher veles, v0.1.0), два
+  language-configuration (`#` для .раз/.яр, `;` для .иск), три грамматики
+  `syntaxes/*.tmLanguage.json` (scopeName source.iskra/razum/yar), README.
+- Лексика извлечена из кода: мнемоники/регистры — `src/iskra/encoder.py`,
+  `regs.py`; директивы — `parser.py`; ключевые слова и типы РАЗУМА —
+  `src/razum/parser.py`, `nodes.py`; ЯР — по черновику `docs/03-яр.md`
+  (грамматика помечена предварительной).
+- Все JSON проверены `python -m json.tool`; регулярки компилируются;
+  смоук-тест на `examples/привет.иск` и `привет.раз` — все строки покрыты.
+- Файла LICENSE в корне нет — поле license в package.json не заполнено.
