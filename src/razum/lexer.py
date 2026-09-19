@@ -107,6 +107,7 @@ def tokenize(src: str) -> tuple[list, list]:
                 raise RazError("неконсистентный отступ", no)
 
         # токены внутри строки
+        база_токов = len(токи)
         j = 0
         m = len(text)
         while j < m:
@@ -193,16 +194,16 @@ def tokenize(src: str) -> tuple[list, list]:
                 continue
             raise RazError(f"неожиданный символ {ch!r}", no)
 
-        # глубина скобок
+        # глубина скобок — только по токенам этой строки
         глубина += sum(
             1
-            for t in токи
-            if t.вид == "ОП" and t.строка == no and t.знач in "([{"  # noqa: E501
+            for t in токи[база_токов:]
+            if t.вид == "ОП" and t.знач in "([{"  # noqa: E501
         )
         глубина -= sum(
             1
-            for t in токи
-            if t.вид == "ОП" and t.строка == no and t.знач in ")]}"  # noqa: E501
+            for t in токи[база_токов:]
+            if t.вид == "ОП" and t.знач in ")]}"  # noqa: E501
         )
         if глубина == 0:
             токи.append(Ток("НС", None, no))

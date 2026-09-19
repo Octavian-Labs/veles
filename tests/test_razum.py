@@ -3,6 +3,7 @@
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 import pytest
@@ -391,6 +392,99 @@ def test_e2e_stdlib_список(tmp_path):
     прог = загрузить(КОРЕНЬ / "examples" / "список_демо.раз")
     р = subprocess.run([str(_exe_из(прог, tmp_path))], capture_output=True)
     assert р.returncode == 60
+
+
+def test_raz_лексер_паритет(tmp_path):
+    """Лексер на РАЗУМЕ (raz/лексер.раз) даёт тот же поток токенов,
+    что и Python-лексер — прогон по пробелы.раз (искра-блок, все узлы)."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "raz" / "лексер_тест.раз")
+    бин = assemble(generate(прог), target="windows")
+    exe = tmp_path / "лекс.exe"
+    exe.write_bytes(бин)
+    src = (КОРЕНЬ / "examples" / "пробелы.раз").read_text(encoding="utf-8")
+    р = subprocess.run([str(exe)], input=src.encode("utf-8"), capture_output=True)
+    assert р.returncode == 0
+    строки = р.stdout.decode("utf-8").splitlines()
+    токи, _ = tokenize(src)
+    код = {
+        "ИМЯ": 1,
+        "ЧИСЛО": 2,
+        "СТР": 3,
+        "ОП": 4,
+        "НС": 5,
+        "ОТСТУП": 6,
+        "СНЯТИЕ": 7,
+        "КФ": 8,
+    }
+    assert len(строки) == len(
+        токи
+    ), f"токенов: разум-лексер {len(строки)}, python {len(токи)}"
+    for i, (л, t) in enumerate(zip(строки, токи)):
+        вид, знач, текст = л.split(":", 2)
+        assert int(вид) == код[t.вид], f"токен {i}: вид"
+        if t.вид == "ЧИСЛО":
+            assert int(знач) == t.знач, f"токен {i}: знач"
+        if t.вид in ("ИМЯ", "ОП", "СТР"):
+            assert текст == t.знач, f"токен {i}: текст {текст!r} != {t.знач!r}"
+
+
+def test_raz_лексер_скорость(tmp_path):
+    """Бенч для прикола: лексер на РАЗУМЕ против Python-лексера на ~0.5 МБ."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "raz" / "лексер_бенч.раз")
+    бин = assemble(generate(прог), target="windows")
+    exe = tmp_path / "бенч.exe"
+    exe.write_bytes(бин)
+    # ~0.5 МБ повторяющихся функций
+    src = "".join(
+        f"функ ф{i}(а, б цел64) цел64:\n"
+        f"    если а > б и а != 0:\n"
+        f"        верни а * {i} + б\n"
+        f"    иначе:\n"
+        f"        верни б - {i}\n\n"
+        for i in range(3000)
+    ).encode("utf-8")
+
+    t0 = time.perf_counter()
+    токи, _ = tokenize(src.decode("utf-8"))
+    t_py = time.perf_counter() - t0
+
+    t0 = time.perf_counter()
+    р = subprocess.run([str(exe)], input=src, capture_output=True)
+    t_raz = time.perf_counter() - t0
+    assert р.returncode == 0
+
+    print(
+        f"\nлексер на {len(src)} байт: python {t_py*1000:.0f} мс, "
+        f"разум {t_raz*1000:.0f} мс — {t_py/t_raz:.1f}x"
+    )
+    # мягкая проверка: разум-лексер не медленнее python в 2 раза
+    assert t_raz < max(t_py * 2, 5.0)
+
+
+def test_raz_парсер_сводка(tmp_path):
+    """Парсер на РАЗУМЕ разбирает пробелы.раз и лексер.раз — сводка объявлений."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "raz" / "парсер_тест.раз")
+    бин = assemble(generate(прог), target="windows")
+    exe = tmp_path / "парс.exe"
+    exe.write_bytes(бин)
+    # пробелы.раз: запись + 4 функции
+    src = (КОРЕНЬ / "examples" / "пробелы.раз").read_bytes()
+    р = subprocess.run([str(exe)], input=src, capture_output=True)
+    assert р.returncode == 0
+    out = р.stdout.decode("utf-8", errors="replace")
+    assert "объявлений: 5" in out
+    assert "4:главная" in out
+    # лексер.раз — 26 объявлений (консты, записи, функции)
+    src = (КОРЕНЬ / "raz" / "лексер.раз").read_bytes()
+    р = subprocess.run([str(exe)], input=src, capture_output=True)
+    assert р.returncode == 0
+    assert "объявлений: 26" in р.stdout.decode("utf-8", errors="replace")
 
 
 def test_ген_несовместимые_указатели():
