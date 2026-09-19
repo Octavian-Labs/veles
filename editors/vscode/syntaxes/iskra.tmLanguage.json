@@ -1,0 +1,146 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ИСКРА",
+  "scopeName": "source.iskra",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#label" },
+    { "include": "#constant-def" },
+    { "include": "#directive" },
+    { "include": "#sizeword" },
+    { "include": "#mnemonic" },
+    { "include": "#register" },
+    { "include": "#builtin-constant" },
+    { "include": "#number" },
+    { "include": "#operator" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.semicolon.iskra",
+          "match": ";.*$"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.iskra",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.iskra",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.iskra",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.iskra",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "label": {
+      "patterns": [
+        {
+          "name": "meta.label.iskra",
+          "match": "^\\s*([A-Za-zА-Яа-яЁё_.][A-Za-zА-Яа-яЁё0-9_.]*)(\\s*:)",
+          "captures": {
+            "1": { "name": "entity.name.function.iskra" },
+            "2": { "name": "keyword.operator.iskra" }
+          }
+        }
+      ]
+    },
+    "constant-def": {
+      "patterns": [
+        {
+          "name": "meta.constant.iskra",
+          "match": "(?i)^\\s*([A-Za-zА-Яа-яЁё_.][A-Za-zА-Яа-яЁё0-9_.]*)(\\s+)(РАВНО)(?![A-Za-zА-Яа-яЁё0-9_.])",
+          "captures": {
+            "1": { "name": "constant.other.iskra" },
+            "3": { "name": "keyword.operator.iskra" }
+          }
+        }
+      ]
+    },
+    "directive": {
+      "patterns": [
+        {
+          "name": "support.constant.iskra",
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(СЕКЦИЯ|ИМПОРТ|ВХОД|ВЫРОВНЯТЬ|РЕЗЕРВ)(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "sizeword": {
+      "patterns": [
+        {
+          "name": "storage.type.iskra",
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(БАЙТ|СЛОВО|ДВСЛОВО|КВАД)(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "mnemonic": {
+      "patterns": [
+        {
+          "name": "keyword.control.iskra",
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(УСТ(?:ПЕРЕПОЛН|НЕПЕРЕПОЛН|НИЖЕ|ПЕРЕНОС|НЕНИЖЕ|ВЫШРАВ|НЕПЕРЕНОС|РАВНО|НОЛЬ|НЕРАВНО|НЕНОЛЬ|НИЖРАВ|НЕВЫШЕ|ВЫШЕ|НЕНИЖРАВ|ЗНАК|НЕЗНАК|ЧЁТ|ЧЕТ|НЕЧЁТ|НЕЧЕТ|МЕНЬШЕ|БОЛРАВ|НЕМЕНЬШЕ|МЕНРАВ|НЕБОЛЬШЕ|БОЛЬШЕ|НЕМЕНРАВ)|ПЕРЕПОЛН|НЕПЕРЕПОЛН|НИЖЕ|ПЕРЕНОС|НЕНИЖЕ|ВЫШРАВ|НЕПЕРЕНОС|НЕРАВНО|НЕНОЛЬ|НИЖРАВ|НЕВЫШЕ|НЕНИЖРАВ|НЕЗНАК|НЕЧЁТ|НЕЧЕТ|МЕНЬШЕ|БОЛРАВ|НЕМЕНЬШЕ|МЕНРАВ|НЕБОЛЬШЕ|БОЛЬШЕ|НЕМЕНРАВ|РАВНО|НОЛЬ|ВЫШЕ|ЗНАК|ЧЁТ|ЧЕТ|ЗНАКРАСШД|ЗНАКРАСШ|БЕЗРАСШ|ИЗСТЕКА|ВОЗВРАТ|СИСВЫЗОВ|ПРЕРЫВ|ПОКИНЬ|ВЫЗОВ|ВСТЕК|ОБМЕН|УМНБ|ДЕЛБ|СДПА|РАСШД|ДОБП|ВЫЧП|ИИЛИ|УВЕЛ|УМЕН|СРАВ|ПРЫГ|НОП|СТОП|ВРЛ|ВРП|СДЛ|СДП|ДОБ|ВЫЧ|УМН|ДЕЛ|ПРОВ|АДР|ПЕР|ИЛИ|ОТР|РАСШ|НЕ|И)(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "register": {
+      "patterns": [
+        {
+          "name": "support.constant.iskra",
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(?:(?:АКК|СЧТ|ДАН|БАЗ|УКС|УКК|ИСТ|ПРМ|Р8|Р9|Р1[0-5])[МПБ]?|R(?:8|9|1[0-5])[DWB]?|RAX|RCX|RDX|RBX|RSP|RBP|RSI|RDI|EAX|ECX|EDX|EBX|ESP|EBP|ESI|EDI|AX|CX|DX|BX|SP|BP|SI|DI|AL|CL|DL|BL|SPL|BPL|SIL|DIL)(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "builtin-constant": {
+      "patterns": [
+        {
+          "name": "constant.language.iskra",
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])ЗДЕСЬ(?![A-Za-zА-Яа-яЁё0-9_.])|\\$"
+        }
+      ]
+    },
+    "number": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.iskra",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])0[xX][0-9a-fA-F_]+(?![A-Za-zА-Яа-яЁё0-9_.])"
+        },
+        {
+          "name": "constant.numeric.binary.iskra",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])0[bB][01_]+(?![A-Za-zА-Яа-яЁё0-9_.])"
+        },
+        {
+          "name": "constant.numeric.octal.iskra",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])0[oO][0-7_]+(?![A-Za-zА-Яа-яЁё0-9_.])"
+        },
+        {
+          "name": "constant.numeric.decimal.iskra",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])[0-9][0-9_]*(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "operator": {
+      "patterns": [
+        {
+          "name": "keyword.operator.iskra",
+          "match": "<<|>>|[-+*/%=&|^~<>\\[\\](),:]"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "РАЗУМ",
+  "scopeName": "source.razum",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#char" },
+    { "include": "#function-decl" },
+    { "include": "#type-decl" },
+    { "include": "#const-decl" },
+    { "include": "#keyword" },
+    { "include": "#type" },
+    { "include": "#constant" },
+    { "include": "#builtin" },
+    { "include": "#number" },
+    { "include": "#operator" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.razum",
+          "match": "#.*$"
+        },
+        {
+          "name": "comment.line.semicolon.razum",
+          "match": ";.*$"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.razum",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.razum",
+              "match": "\\\\x[0-9A-Fa-f]{2}|\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "char": {
+      "patterns": [
+        {
+          "name": "string.quoted.single.razum",
+          "match": "'(?:\\\\x[0-9A-Fa-f]{2}|\\\\.|[^'\\\\])'"
+        }
+      ]
+    },
+    "function-decl": {
+      "patterns": [
+        {
+          "name": "meta.function.method.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(функ)\\s*\\([^)]*\\)\\s*([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.razum" },
+            "2": { "name": "entity.name.function.razum" }
+          }
+        },
+        {
+          "name": "meta.function.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(функ)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.razum" },
+            "2": { "name": "entity.name.function.razum" }
+          }
+        }
+      ]
+    },
+    "type-decl": {
+      "patterns": [
+        {
+          "name": "meta.type.declaration.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(запись|переч|тип)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.razum" },
+            "2": { "name": "entity.name.type.razum" }
+          }
+        }
+      ]
+    },
+    "const-decl": {
+      "patterns": [
+        {
+          "name": "meta.constant.declaration.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(конст)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.razum" },
+            "2": { "name": "constant.other.razum" }
+          }
+        }
+      ]
+    },
+    "keyword": {
+      "patterns": [
+        {
+          "name": "keyword.control.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(а\\s+если|если|иначе|пока|вечно|для|выбор|верни|хватит|следующий|отложи|искра)(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "keyword.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(взять|внеш|функ|запись|переч|тип|конст)(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "keyword.operator.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(не\\s+в|и|или|не|как|в|новый|размер)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "type": {
+      "patterns": [
+        {
+          "name": "storage.type.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(цел8|цел16|цел32|цел64|без8|без16|без32|без64|бул|сим|стр|д32|д64)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "constant": {
+      "patterns": [
+        {
+          "name": "constant.language.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(да|нет|пусто)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "builtin": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(выдели|освободи)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "number": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])0[xX][0-9a-fA-F_]+(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "constant.numeric.binary.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])0[bB][01_]+(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "constant.numeric.octal.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])0[oO][0-7_]+(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "constant.numeric.decimal.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])[0-9][0-9_]*(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "operator": {
+      "patterns": [
+        {
+          "name": "keyword.operator.razum",
+          "match": "\\.\\.=|<<=|>>=|\\.\\.|:=|==|!=|<=|>=|<<|>>|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|[-+*/%<>=()\\[\\]{},.:&|^!]"
+        }
+      ]
+    }
+  }
+}
