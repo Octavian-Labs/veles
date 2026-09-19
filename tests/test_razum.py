@@ -480,11 +480,11 @@ def test_raz_парсер_сводка(tmp_path):
     out = р.stdout.decode("utf-8", errors="replace")
     assert "объявлений: 5" in out
     assert "4:главная" in out
-    # лексер.раз — 26 объявлений (консты, записи, функции)
+    # лексер.раз — 27 объявлений (консты, записи, функции)
     src = (КОРЕНЬ / "raz" / "лексер.раз").read_bytes()
     р = subprocess.run([str(exe)], input=src, capture_output=True)
     assert р.returncode == 0
-    assert "объявлений: 26" in р.stdout.decode("utf-8", errors="replace")
+    assert "объявлений: 27" in р.stdout.decode("utf-8", errors="replace")
 
 
 def test_ген_несовместимые_указатели():
