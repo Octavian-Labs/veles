@@ -25,7 +25,7 @@ jobs:
           python -m pytest tests
       - name: Build and run PE example
         run: |
-          python -m src.asm_rus examples/привет.асм -o привет.exe
+          python -m src.iskra examples/привет.иск -o привет.exe
           ./привет.exe
 
   linux:
@@ -45,5 +45,5 @@ jobs:
           python -m pytest tests
       - name: Build and run ELF example
         run: |
-          python -m src.asm_rus examples/привет_linux.асм --цель linux -o привет
+          python -m src.iskra examples/привет_linux.иск --цель linux -o привет
           chmod +x привет && ./привет
