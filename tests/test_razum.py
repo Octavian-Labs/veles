@@ -315,6 +315,28 @@ def test_e2e_пробелы_код_выхода():
     assert р.returncode == 52
 
 
+def test_e2e_stdlib_основа():
+    """взять основа → печать, склейка, сравнение строк, цел_в_стр."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "examples" / "основа_демо.раз")
+    бин = assemble(generate(прог), target="windows")
+    with tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as f:
+        f.write(бин)
+        exe = f.name
+    р = subprocess.run([exe], capture_output=True)
+    assert р.returncode == 42
+    out = р.stdout.decode("utf-8", errors="replace")
+    assert "Ответ: 42" in out and "склейка работает" in out
+
+
+def test_stdlib_linux_elf():
+    """Та же программа на основе собирается в ELF64 (консоль.linux.раз)."""
+    прог = загрузить(КОРЕНЬ / "examples" / "основа_демо.раз", target="linux")
+    бин = assemble(generate(прог, target="linux"), target="linux")
+    assert бин[:4] == b"\x7fELF"
+
+
 def test_e2e_linux_elf():
     """Тот же исходник — цель linux: собирается в ELF64."""
     src = (КОРЕНЬ / "examples" / "выход_linux.раз").read_text(encoding="utf-8")
