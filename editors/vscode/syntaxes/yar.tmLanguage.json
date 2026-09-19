@@ -1,0 +1,136 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ЯР",
+  "scopeName": "source.yar",
+  "patterns": [
+    { "include": "#comment" },
+    { "include": "#string" },
+    { "include": "#function-decl" },
+    { "include": "#type-decl" },
+    { "include": "#keyword" },
+    { "include": "#constant" },
+    { "include": "#special-var" },
+    { "include": "#number" },
+    { "include": "#operator" }
+  ],
+  "repository": {
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.yar",
+          "match": "#.*$"
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.yar",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.yar",
+              "match": "\\\\."
+            },
+            {
+              "name": "meta.interpolation.yar",
+              "begin": "\\{",
+              "end": "\\}",
+              "patterns": [
+                { "include": "#string" },
+                { "include": "#keyword" },
+                { "include": "#constant" },
+                { "include": "#special-var" },
+                { "include": "#number" },
+                { "include": "#operator" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "function-decl": {
+      "patterns": [
+        {
+          "name": "meta.function.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(умеет)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "captures": {
+            "1": { "name": "keyword.yar" },
+            "2": { "name": "entity.name.function.yar" }
+          }
+        }
+      ]
+    },
+    "type-decl": {
+      "patterns": [
+        {
+          "name": "meta.type.declaration.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(суть)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)(?:\\s+(из)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*))?",
+          "captures": {
+            "1": { "name": "keyword.yar" },
+            "2": { "name": "entity.name.type.yar" },
+            "3": { "name": "keyword.yar" },
+            "4": { "name": "entity.name.type.yar" }
+          }
+        }
+      ]
+    },
+    "keyword": {
+      "patterns": [
+        {
+          "name": "keyword.control.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(а\\s+если|не\\s+вышло|всё\\s+равно|все\\s+равно|если|иначе|выбор|для|вечно|пока|раза|разы|раз|хватит|следующий|дай|попробуй|брось)(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "keyword.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(взять|суть|из|умеет)(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "keyword.operator.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(не\\s+в|не\\s+пусто|и|или|не|как|в)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "constant": {
+      "patterns": [
+        {
+          "name": "constant.language.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(да|нет|пусто)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "special-var": {
+      "patterns": [
+        {
+          "name": "variable.language.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(оно|тут)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "number": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])0[xX][0-9a-fA-F_]+(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "constant.numeric.float.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])[0-9][0-9_]*\\.[0-9][0-9_]*(?![A-Za-zА-Яа-яЁё0-9_.])"
+        },
+        {
+          "name": "constant.numeric.decimal.yar",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])[0-9][0-9_]*(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "operator": {
+      "patterns": [
+        {
+          "name": "keyword.operator.yar",
+          "match": "\\.\\.=|\\.\\.|==|!=|<=|>=|//|\\+=|-=|\\*=|/=|%=|[-+*/%<>=()\\[\\]{},.:!]"
+        }
+      ]
+    }
+  }
+}
