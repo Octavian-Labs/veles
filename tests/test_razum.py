@@ -337,6 +337,78 @@ def test_stdlib_linux_elf():
     assert бин[:4] == b"\x7fELF"
 
 
+def _exe_из(прог, tmp_path):
+    """Собирает программу во временный exe, возвращает путь."""
+    бин = assemble(generate(прог), target="windows")
+    exe = tmp_path / "прог.exe"
+    exe.write_bytes(бин)
+    return exe
+
+
+def test_e2e_stdlib_выход(tmp_path):
+    """система.выход(код) завершает процесс с нужным кодом."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "examples" / "выход_демо.раз")
+    р = subprocess.run([str(_exe_из(прог, tmp_path))], capture_output=True)
+    assert р.returncode == 7
+    assert "до выхода" in р.stdout.decode("utf-8", errors="replace")
+
+
+def test_e2e_stdlib_файл(tmp_path):
+    """файл_запиши + файл_прочти + стр_найди + стр_число: код 42."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "examples" / "файл_демо.раз")
+    р = subprocess.run(
+        [str(_exe_из(прог, tmp_path))], capture_output=True, cwd=tmp_path
+    )
+    out = р.stdout.decode("utf-8", errors="replace")
+    assert р.returncode == 42
+    assert "прочитано: раз два три 42" in out
+    assert (tmp_path / "veles_test.txt").read_bytes() == "раз два три 42".encode(
+        "utf-8"
+    )
+
+
+def test_e2e_stdlib_ввод(tmp_path):
+    """консоль.ввод() читает весь stdin до EOF."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "examples" / "ввод_демо.раз")
+    данные = "тест ввода\n".encode("utf-8")
+    р = subprocess.run(
+        [str(_exe_из(прог, tmp_path))], capture_output=True, input=данные
+    )
+    assert р.returncode == 0
+    assert str(len(данные)) in р.stdout.decode("utf-8", errors="replace")
+
+
+def test_e2e_stdlib_список(tmp_path):
+    """Список: добавление, рост ёмкости, сумма элементов — код 60."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    прог = загрузить(КОРЕНЬ / "examples" / "список_демо.раз")
+    р = subprocess.run([str(_exe_из(прог, tmp_path))], capture_output=True)
+    assert р.returncode == 60
+
+
+def test_ген_несовместимые_указатели():
+    """*Точка не присваивается *Список — указатели проверяются по базе."""
+    src = (
+        "запись Точка:\n"
+        "    х цел64\n"
+        "запись Другое:\n"
+        "    у цел64\n"
+        "функ главная() цел64:\n"
+        "    т *Точка = новый(Точка)\n"
+        "    д *Другое = т\n"
+        "    верни 0\n"
+    )
+    with pytest.raises(RazError, match="указатели"):
+        generate(parse(src))
+
+
 def test_e2e_linux_elf():
     """Тот же исходник — цель linux: собирается в ELF64."""
     src = (КОРЕНЬ / "examples" / "выход_linux.раз").read_text(encoding="utf-8")
