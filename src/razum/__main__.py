@@ -42,7 +42,7 @@ def main(argv: list | None = None) -> int:
         print(f"ошибка: файл {src_path} не найден", file=sys.stderr)
         return 2
     try:
-        прог = загрузить(src_path)
+        прог = загрузить(src_path, target=args.цель)
         искра = generate(прог, target=args.цель)
     except RazError as e:
         print(f"разум: {e}", file=sys.stderr)

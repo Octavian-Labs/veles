@@ -295,6 +295,8 @@ class Генератор:
                     return self.функции[имя][1]
                 if имя == "освободи":
                     return N.ПУСТО
+                if имя == "выдели":
+                    return N.указ(N.БЕЗ8)
                 слот = self._ctx.локалы.get(имя) or self._ctx.парамы.get(имя)
                 if слот and self._реш_тип(слот[1]).вид == "функ":
                     return self._реш_тип(слот[1]).вз or N.ПУСТО
@@ -688,6 +690,14 @@ class Генератор:
             self.e("ПЕР СЧТ, АКК")
             self._пад_и_вызов("стд_освободи")
             return N.ПУСТО
+        if имя == "выдели":
+            if len(e.арги) != 1:
+                raise RazError("выдели(размер) — один аргумент", e.строка)
+            self.нужны_стд.add("выдели")
+            self._выр(e.арги[0][1])
+            self.e("ПЕР СЧТ, АКК")
+            self._пад_и_вызов("стд_выдели")
+            return N.указ(N.БЕЗ8)
         if имя == "новый":
             raise RazError("новый(Тип) — без аргументов-выражений", e.строка)
         if имя not in self.функции:
@@ -1501,7 +1511,9 @@ class Генератор:
                     след += 1
                 self.перечи[d.имя] = значения
             elif isinstance(d, N.Внеш):
-                self.импорты.setdefault(d.dll, []).append(d.имя)
+                funcs = self.импорты.setdefault(d.dll, [])
+                if d.имя not in funcs:
+                    funcs.append(d.имя)
                 self.функции[d.имя] = (d.параметры, d.возвр, True)
             elif isinstance(d, N.Функ):
                 if d.приёмник is not None:
