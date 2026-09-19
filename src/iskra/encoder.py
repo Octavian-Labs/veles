@@ -244,7 +244,7 @@ def _finish(
     return bytes(out)
 
 
-def _enc_rm_reg(enc, ins, opcode: int, rm_op, reg_op, imm: bytes = b"") -> bytes:
+def _enc_rm_reg(enc, ins, opcode, rm_op, reg_op, imm: bytes = b"") -> bytes:
     """Кодирует форму «r/m, reg» или «reg, r/m» (opcode /r)."""
     tail = bytearray()
     x, b = enc.rm(tail, rm_op, reg_op.num & 7)
@@ -256,7 +256,8 @@ def _enc_rm_reg(enc, ins, opcode: int, rm_op, reg_op, imm: bytes = b"") -> bytes
         b,
         force=_need_rex8(rm_op) or _need_rex8(reg_op),
     )
-    return _finish(enc, ins, size == 2, rex, bytes([opcode]), tail, imm)
+    opc = opcode if isinstance(opcode, bytes) else bytes([opcode])
+    return _finish(enc, ins, size == 2, rex, opc, tail, imm)
 
 
 def _enc_binop(enc, ins, code: int) -> bytes:
@@ -585,6 +586,48 @@ def _enc_test(enc, ins) -> bytes:
     raise AsmError("ПРОВ: недопустимое сочетание операндов", ins.line)
 
 
+def _enc_setcc(enc, ins, cc: int) -> bytes:
+    """Кодирует УСТ<усл> (setcc): байт <- 1 если условие истинно."""
+    (a,) = ins.ops
+    if not isinstance(a, (Reg, Mem)):
+        raise AsmError(f"{ins.mnem}: ожидался регистр/байт", ins.line)
+    size = a.size if isinstance(a, Reg) else _op_size([a], ins.line)
+    if size != 1:
+        raise AsmError(f"{ins.mnem}: операнд должен быть байтом", ins.line)
+    tail = bytearray()
+    x, r_b = enc.rm(tail, a, 0)
+    rex = _rex(0, 0, x, r_b, force=_need_rex8(a))
+    return _finish(enc, ins, False, rex, bytes([0x0F, 0x90 + cc]), tail)
+
+
+def _enc_movx(enc, ins, signed: bool) -> bytes:
+    """Кодирует ЗНАКРАСШ (movsx) / БЕЗРАСШ (movzx): расширение 8/16 -> 16/32/64."""
+    a, b = ins.ops
+    if not isinstance(a, Reg) or not isinstance(b, (Reg, Mem)):
+        raise AsmError(f"{ins.mnem}: ожидалось «регистр, источник»", ins.line)
+    ssz = b.size if isinstance(b, Reg) else _op_size([b], ins.line)
+    if ssz == 1:
+        opc = 0xBE if signed else 0xB6
+    elif ssz == 2:
+        opc = 0xBF if signed else 0xB7
+    else:
+        raise AsmError(f"{ins.mnem}: источник — 8 или 16 бит", ins.line)
+    if a.size <= ssz:
+        raise AsmError(f"{ins.mnem}: приёмник должен быть шире источника", ins.line)
+    return _enc_rm_reg(enc, ins, bytes([0x0F, opc]), b, a)
+
+
+def _enc_movsxd(enc, ins) -> bytes:
+    """Кодирует ЗНАКРАСШД (movsxd): знаковое расширение 32 -> 64."""
+    a, b = ins.ops
+    if not isinstance(a, Reg) or not isinstance(b, (Reg, Mem)):
+        raise AsmError("ЗНАКРАСШД: ожидалось «рег64, источник32»", ins.line)
+    ssz = b.size if isinstance(b, Reg) else _op_size([b], ins.line)
+    if a.size != 8 or ssz != 4:
+        raise AsmError("ЗНАКРАСШД: приёмник 64 бита, источник 32", ins.line)
+    return _enc_rm_reg(enc, ins, 0x63, b, a)
+
+
 class _IatExpr(Expr):
     """Псевдовыражение: адрес ячейки IAT для импортированной функции."""
 
@@ -669,6 +712,18 @@ def encode(ins: Instr, ctx) -> bytes:
             if n != 2:
                 raise AsmError("ПРОВ: нужно два операнда", ins.line)
             return _enc_test(enc, ins)
+        if m.startswith("УСТ") and m[3:] in JCC:
+            if n != 1:
+                raise AsmError(f"{m}: нужен один операнд", ins.line)
+            return _enc_setcc(enc, ins, JCC[m[3:]])
+        if m in ("ЗНАКРАСШ", "БЕЗРАСШ"):
+            if n != 2:
+                raise AsmError(f"{m}: нужно два операнда", ins.line)
+            return _enc_movx(enc, ins, m == "ЗНАКРАСШ")
+        if m == "ЗНАКРАСШД":
+            if n != 2:
+                raise AsmError("ЗНАКРАСШД: нужно два операнда", ins.line)
+            return _enc_movsxd(enc, ins)
         raise AsmError(f"неизвестная мнемоника {m!r}", ins.line)
     except AsmError:
         raise

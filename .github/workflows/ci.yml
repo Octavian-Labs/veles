@@ -27,6 +27,13 @@ jobs:
         run: |
           python -m src.iskra examples/привет.иск -o привет.exe
           ./привет.exe
+      - name: Build and run РАЗУМ example
+        run: |
+          python -m src.razum examples/привет.раз -o привет_разум.exe
+          ./привет_разум.exe
+          python -m src.razum examples/вычисления.раз -o вычисления.exe
+          ./вычисления.exe
+          if ($LASTEXITCODE -ne 55) { exit 1 }
 
   linux:
     runs-on: ubuntu-latest
@@ -47,3 +54,8 @@ jobs:
         run: |
           python -m src.iskra examples/привет_linux.иск --цель linux -o привет
           chmod +x привет && ./привет
+      - name: Build and run РАЗУМ ELF example
+        run: |
+          python -m src.razum examples/выход_linux.раз --цель linux -o выход
+          chmod +x выход && ./выход
+          [ $? -eq 42 ]
