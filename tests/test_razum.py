@@ -11,6 +11,7 @@ from razum.errors import RazError
 from razum.lexer import tokenize
 from razum.parser import parse
 from razum.gen import generate
+from razum.loader import загрузить
 from iskra.assembler import assemble
 
 КОРЕНЬ = Path(__file__).resolve().parent.parent
@@ -116,6 +117,41 @@ def test_парсер_ошибка_синтаксиса():
         parse("функ ф(:\n")
 
 
+def test_парсер_метод():
+    прог = parse("функ (т *Точка) норма() цел64:\n    верни т.х\n")
+    ф = прог.decls[0]
+    assert ф.приёмник is not None and ф.приёмник.имя == "т"
+    assert ф.приёмник.тип.вид == "указ"
+
+
+def test_парсер_литерал_записи():
+    прог = parse("функ ф():\n    т := Точка{х: 1, у: 2}\n")
+    с = прог.decls[0].тело[0]
+    assert type(с.выр).__name__ == "ЛитТип"
+    assert с.выр.элементы[0][0] == "х"
+
+
+def test_парсер_литерал_массива():
+    прог = parse("функ ф():\n    а := без8[3]{1, 2, 3}\n")
+    с = прог.decls[0].тело[0]
+    лит = с.выр
+    assert type(лит).__name__ == "ЛитТип"
+    assert лит.тип.вид == "масс" and лит.тип.n == 3
+
+
+def test_парсер_срез():
+    прог = parse("функ ф():\n    с := arr[1..4]\n")
+    с = прог.decls[0].тело[0]
+    assert type(с.выр).__name__ == "СрезДиап"
+    assert с.выр.диап.вкл is False
+
+
+def test_парсер_тип_функция():
+    прог = parse("функ ф():\n    г функ(цел64) цел64 = пусто\n")
+    с = прог.decls[0].тело[0]
+    assert с.тип.вид == "функ" and len(с.тип.арги) == 1
+
+
 # --- генерация ----------------------------------------------------------------
 
 
@@ -144,6 +180,88 @@ def test_ген_строка_в_данные():
 def test_ген_нет_главной():
     with pytest.raises(RazError):
         generate(parse("функ ф():\n    верни 0\n"))
+
+
+def test_ген_метод():
+    src = (
+        "запись Точка: х цел64\n"
+        "функ (т *Точка) дабл() цел64:\n    верни т.х * 2\n"
+        "функ главная() цел64:\n"
+        "    т Точка = Точка{х: 5}\n    верни т.дабл()\n"
+    )
+    искра = generate(parse(src))
+    assert "ф_Точка_дабл:" in искра and "ВЫЗОВ ф_Точка_дабл" in искра
+
+
+def test_ген_косвенный_вызов():
+    src = (
+        "функ ф(а цел64) цел64:\n    верни а\n"
+        "функ главная() цел64:\n"
+        "    г функ(цел64) цел64 = ф\n    верни г(1)\n"
+    )
+    искра = generate(parse(src))
+    assert "ВЫЗОВ Р11" in искра
+
+
+def test_ген_искра_локали():
+    src = (
+        "функ главная() цел64:\n    х := 7\n"
+        "    искра:\n        ПЕР АКК, х\n    верни х\n"
+    )
+    искра = generate(parse(src))
+    assert "ПЕР АКК, [УКК-8]" in искра
+
+
+def test_ген_несовместимые_типы():
+    src = 'функ главная():\n    х цел64 = "текст"\n'
+    with pytest.raises(RazError):
+        generate(parse(src))
+
+
+def test_ген_литерал_литерал_вне_диапазона():
+    src = "функ главная():\n    б без8 = 999\n"
+    with pytest.raises(RazError):
+        generate(parse(src))
+
+
+# --- модули --------------------------------------------------------------------
+
+
+def test_взять_модуль(tmp_path):
+    (tmp_path / "матем.раз").write_text(
+        "функ квадрат(а цел64) цел64:\n    верни а * а\n", encoding="utf-8"
+    )
+    (tmp_path / "прога.раз").write_text(
+        "взять матем\nфунк главная() цел64:\n    верни квадрат(7)\n",
+        encoding="utf-8",
+    )
+    прог = загрузить(tmp_path / "прога.раз")
+    имена = [d.имя for d in прог.decls]
+    assert "квадрат" in имена and "главная" in имена
+    искра = generate(прог)
+    assert "ф_квадрат:" in искра
+
+
+def test_взять_цикл_без_зависания(tmp_path):
+    (tmp_path / "а.раз").write_text(
+        "взять б\nфунк фа():\n    верни 0\n", encoding="utf-8"
+    )
+    (tmp_path / "б.раз").write_text(
+        "взять а\nфунк фб():\n    верни 0\n", encoding="utf-8"
+    )
+    (tmp_path / "прога.раз").write_text(
+        "взять а\nфунк главная() цел64:\n    верни 0\n", encoding="utf-8"
+    )
+    прог = загрузить(tmp_path / "прога.раз")
+    assert any(d.имя == "фа" for d in прог.decls)
+
+
+def test_взять_не_найден(tmp_path):
+    (tmp_path / "прога.раз").write_text(
+        "взять нету\nфунк главная():\n    верни 0\n", encoding="utf-8"
+    )
+    with pytest.raises(RazError):
+        загрузить(tmp_path / "прога.раз")
 
 
 # --- end-to-end ----------------------------------------------------------------
@@ -182,6 +300,19 @@ def test_e2e_вычисления_код_выхода():
         exe = f.name
     р = subprocess.run([exe], capture_output=True)
     assert р.returncode == 55
+
+
+def test_e2e_пробелы_код_выхода():
+    """Методы, косвенные вызовы, литералы, срезы и искра-локали — код 52."""
+    if sys.platform != "win32":
+        pytest.skip("запуск PE64 только на Windows")
+    src = (КОРЕНЬ / "examples" / "пробелы.раз").read_text(encoding="utf-8")
+    бин = assemble(generate(parse(src)), target="windows")
+    with tempfile.NamedTemporaryFile(suffix=".exe", delete=False) as f:
+        f.write(бин)
+        exe = f.name
+    р = subprocess.run([exe], capture_output=True)
+    assert р.returncode == 52
 
 
 def test_e2e_linux_elf():

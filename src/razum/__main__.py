@@ -14,7 +14,7 @@ from pathlib import Path
 
 from .errors import RazError
 from .gen import generate
-from .parser import parse
+from .loader import загрузить
 
 
 def main(argv: list | None = None) -> int:
@@ -41,10 +41,8 @@ def main(argv: list | None = None) -> int:
     if not src_path.exists():
         print(f"ошибка: файл {src_path} не найден", file=sys.stderr)
         return 2
-    src = src_path.read_text(encoding="utf-8")
-
     try:
-        прог = parse(src)
+        прог = загрузить(src_path)
         искра = generate(прог, target=args.цель)
     except RazError as e:
         print(f"разум: {e}", file=sys.stderr)
