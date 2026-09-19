@@ -2,9 +2,9 @@
 
 import pytest
 
-from asm_rus.encoder import encode
-from asm_rus.errors import AsmError
-from asm_rus.parser import Instr, parse
+from iskra.encoder import encode
+from iskra.errors import AsmError
+from iskra.parser import Instr, parse
 
 
 class _Ctx:
