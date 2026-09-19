@@ -1,4 +1,4 @@
-"""Точка входа CLI: python -m asm_rus вход.асм [-o выход] [--цель ...]."""
+"""Точка входа CLI: python -m iskra вход.иск [-o выход] [--цель ...]."""
 
 from __future__ import annotations
 
@@ -13,10 +13,10 @@ from .errors import AsmError
 def main(argv: list[str] | None = None) -> int:
     """Разбирает аргументы командной строки и запускает ассемблер."""
     p = argparse.ArgumentParser(
-        prog="rasm",
-        description="РАСМ — русский ассемблер x86-64 (PE64/ELF64)",
+        prog="iskra",
+        description="ИСКРА — русский ассемблер x86-64 (PE64/ELF64)",
     )
-    p.add_argument("вход", help="файл исходника (.асм)")
+    p.add_argument("вход", help="файл исходника (.иск)")
     p.add_argument("-o", "--выход", help="имя выходного файла")
     p.add_argument(
         "--цель",

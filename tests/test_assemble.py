@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from asm_rus.assembler import assemble
+from iskra.assembler import assemble
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"
@@ -15,7 +15,7 @@ EXAMPLES = ROOT / "examples"
 
 def test_pe_привет_структура():
     """PE64: сигнатуры MZ/PE, машина x86-64, точка входа в .text."""
-    src = (EXAMPLES / "привет.асм").read_text(encoding="utf-8")
+    src = (EXAMPLES / "привет.иск").read_text(encoding="utf-8")
     data = assemble(src, "windows")
     assert data[:2] == b"MZ"
     pe_off = struct.unpack_from("<I", data, 0x3C)[0]
@@ -29,7 +29,7 @@ def test_pe_привет_структура():
 @pytest.mark.skipif(sys.platform != "win32", reason="запуск exe только в Windows")
 def test_pe_привет_запуск(tmp_path):
     """Собранный привет.exe реально печатает строку и возвращает 0."""
-    src = (EXAMPLES / "привет.асм").read_text(encoding="utf-8")
+    src = (EXAMPLES / "привет.иск").read_text(encoding="utf-8")
     exe = tmp_path / "привет.exe"
     exe.write_bytes(assemble(src, "windows"))
     res = subprocess.run([str(exe)], capture_output=True, timeout=15)
@@ -39,7 +39,7 @@ def test_pe_привет_запуск(tmp_path):
 
 def test_elf_привет_структура():
     """ELF64: магия, тип EXEC, машина x86-64, точка входа за заголовками."""
-    src = (EXAMPLES / "привет_linux.асм").read_text(encoding="utf-8")
+    src = (EXAMPLES / "привет_linux.иск").read_text(encoding="utf-8")
     data = assemble(src, "linux")
     assert data[:4] == b"\x7fELF"
     assert data[4] == 2 and data[5] == 1  # 64 бита, little-endian
@@ -52,7 +52,7 @@ def test_elf_привет_структура():
 @pytest.mark.skipif(sys.platform != "linux", reason="запуск ELF только в Linux")
 def test_elf_привет_запуск(tmp_path):
     """Собранный ELF реально печатает строку и возвращает 0."""
-    src = (EXAMPLES / "привет_linux.асм").read_text(encoding="utf-8")
+    src = (EXAMPLES / "привет_linux.иск").read_text(encoding="utf-8")
     elf = tmp_path / "привет"
     elf.write_bytes(assemble(src, "linux"))
     elf.chmod(0o755)
@@ -62,7 +62,7 @@ def test_elf_привет_запуск(tmp_path):
 
 
 def test_ошибка_неизвестный_символ():
-    from asm_rus.errors import AsmError
+    from iskra.errors import AsmError
 
     with pytest.raises(AsmError):
         assemble("СЕКЦИЯ код\nВХОД старт\nстарт:\n ПРЫГ нет_такой\n")

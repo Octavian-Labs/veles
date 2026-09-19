@@ -1,4 +1,4 @@
-# run_checks.ps1 — скрипт автопроверок проекта РЯП
+# run_checks.ps1 — скрипт автопроверок экосистемы ВЕЛЕС
 # Форматирование, линт и тесты. Запуск: powershell -File run_checks.ps1
 
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8

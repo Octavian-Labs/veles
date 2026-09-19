@@ -1,7 +1,7 @@
 [project]
-name = "ryap"
+name = "veles"
 version = "0.1.0"
-description = "РЯП — русский язык программирования: ассемблер РАСМ (x86-64)"
+description = "ВЕЛЕС — русская экосистема: ассемблер ИСКРА, языки РАЗУМ и СОЗНАНИЕ"
 requires-python = ">=3.10"
 
 [tool.black]
