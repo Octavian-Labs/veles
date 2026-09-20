@@ -57,7 +57,7 @@ x86-64    системы    высокий уровень
 Требуется Python 3.11+.
 
 ```bash
-git clone https://github.com/Ospray-creator/veles.git
+git clone https://github.com/Octavian-Labs/veles.git
 cd veles
 python -m venv .venv
 ```
