@@ -59,24 +59,24 @@ jobs:
 
       - name: Проверка сид-бинарников (ELF)
         run: |
-          chmod +x искра.elf raz/разум.elf
-          od -A x -t x1 -N 4 искра.elf | grep -q "7f 45 4c 46"
-          od -A x -t x1 -N 4 raz/разум.elf | grep -q "7f 45 4c 46"
+          chmod +x искра raz/разум
+          od -A x -t x1 -N 4 искра | grep -q "7f 45 4c 46"
+          od -A x -t x1 -N 4 raz/разум | grep -q "7f 45 4c 46"
 
       - name: искра собирает привет_linux.иск
         run: |
-          ./искра.elf < examples/привет_linux.иск > привет
+          ./искра < examples/привет_linux.иск > привет
           od -A x -t x1 -N 4 привет | grep -q "7f 45 4c 46"
           chmod +x привет && ./привет
 
       - name: разум компилирует выход_linux.раз
         run: |
-          ./raz/разум.elf --цель linux < examples/выход_linux.раз > выход.иск
+          ./raz/разум --цель linux < examples/выход_linux.раз > выход.иск
           head -1 выход.иск | grep -q "цель linux"
 
       - name: ожидаемый код выхода 42
         run: |
-          ./искра.elf < выход.иск > выход
+          ./искра < выход.иск > выход
           od -A x -t x1 -N 4 выход | grep -q "7f 45 4c 46"
           chmod +x выход
           rc=0; ./выход || rc=$?
@@ -86,9 +86,9 @@ jobs:
       - name: Фикс-поинт самосборки
         run: |
           cd raz
-          chmod +x разум.elf ../искра.elf
-          ./разум.elf --цель linux < разум.раз > сам1.иск
-          ../искра.elf < сам1.иск > разум2
+          chmod +x разум ../искра
+          ./разум --цель linux < разум.раз > сам1.иск
+          ../искра < сам1.иск > разум2
           chmod +x разум2
           ./разум2 --цель linux < разум.раз > сам2.иск
           cmp сам1.иск сам2.иск
