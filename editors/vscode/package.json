@@ -1,8 +1,8 @@
 {
   "name": "veles-languages",
   "displayName": "ВЕЛЕС — ИСКРА/РАЗУМ/ЯР",
-  "description": "Подсветка синтаксиса для языков экосистемы ВЕЛЕС: ИСКРА (.иск, русский ассемблер x86-64), РАЗУМ (.раз, системный язык), ЯР (.яр, флагманский язык).",
-  "version": "0.1.0",
+  "description": "Подсветка синтаксиса и сниппеты для языков экосистемы ВЕЛЕС: ИСКРА (.иск, русский ассемблер x86-64), РАЗУМ (.раз, системный язык), ЯР (.яр, флагманский язык).",
+  "version": "0.2.0",
   "publisher": "veles",
   "engines": {
     "vscode": "^1.60.0"
@@ -74,6 +74,16 @@
         "language": "yar",
         "scopeName": "source.yar",
         "path": "./syntaxes/yar.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "razum",
+        "path": "./snippets/razum.json"
+      },
+      {
+        "language": "iskra",
+        "path": "./snippets/iskra.json"
       }
     ]
   }
