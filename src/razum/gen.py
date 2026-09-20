@@ -540,9 +540,138 @@ class Генератор:
         raise RazError(f"неизвестный унарный {e.оп!r}", e.строка)
 
     _БИН_АРИФ = {"+": "ДОБ", "-": "ВЫЧ", "&": "И", "|": "ИЛИ", "^": "ИИЛИ"}
+    _МАСК64 = (1 << 64) - 1
+
+    def _знак64(self, v: int) -> int:
+        """Битовый образ -> знаковое значение цел64."""
+        v &= self._МАСК64
+        return v - (1 << 64) if v >= (1 << 63) else v
+
+    def _сверни(self, e):
+        """Пробует вычислить выражение на этапе компиляции.
+
+        Возвращает значение или None. Семантика повторяет сгенерированный
+        код: усечённое деление, арифметический сдвиг для знаковых типов,
+        маска счётчика сдвига в 63.
+        """
+        if isinstance(e, N.Число):
+            return e.знач
+        if isinstance(e, N.Бул):
+            return int(e.знач)
+        if isinstance(e, N.Имя):
+            return self.консты.get(e.имя)
+        if isinstance(e, N.Поле) and isinstance(e.об, N.Имя):
+            return self.перечи.get(e.об.имя, {}).get(e.имя)
+        if isinstance(e, N.Ун):
+            v = self._сверни(e.выр)
+            if v is None:
+                return None
+            if e.оп == "-":
+                return -v
+            if e.оп == "не":
+                return int(v == 0)
+            return None
+        if isinstance(e, N.Привед):
+            return self._сверни(e.выр)
+        if isinstance(e, N.Размер):
+            try:
+                t = e.цель if isinstance(e.цель, N.Тип) else self._тип_выр(e.цель)
+                return self.размер(t)
+            except RazError:
+                return None
+        if isinstance(e, N.Бин):
+            return self._сверни_бин(e)
+        return None
+
+    def _сверни_бин(self, e: N.Бин):
+        """Свёртка бинарной операции с точной семантикой целевого кода."""
+        a = self._сверни(e.лев)
+        if a is None:
+            return None
+        оп = e.оп
+        if оп == "в":
+            диап = e.прав
+            if not isinstance(диап, N.Диап):
+                return None
+            lo, hi = self._сверни(диап.лев), self._сверни(диап.прав)
+            if lo is None or hi is None:
+                return None
+            uns = not N.знаковый(self._тип_выр(e.лев))
+            if uns:
+                х, ло, хи = a & self._МАСК64, lo & self._МАСК64, hi & self._МАСК64
+            else:
+                х, ло, хи = self._знак64(a), self._знак64(lo), self._знак64(hi)
+            return int(ло <= х <= хи if диап.вкл else ло <= х < хи)
+        b = self._сверни(e.прав)
+        if b is None:
+            return None
+        if оп == "и":
+            return int(bool(a) and bool(b))
+        if оп == "или":
+            return int(bool(a) or bool(b))
+        try:
+            uns = not (
+                N.знаковый(self._тип_выр(e.лев))
+                and N.знаковый(self._тип_выр(e.прав))
+            )
+        except RazError:
+            return None
+        ау, бу = a & self._МАСК64, b & self._МАСК64
+        if оп == "+":
+            return ау + бу
+        if оп == "-":
+            return ау - бу
+        if оп == "*":
+            return ау * бу
+        if оп == "&":
+            return ау & бу
+        if оп == "|":
+            return ау | бу
+        if оп == "^":
+            return ау ^ бу
+        if оп == "<<":
+            return ау << (бу & 63)
+        if оп == ">>":
+            if uns:
+                return ау >> (бу & 63)
+            return self._знак64(ау) >> (бу & 63)
+        if оп in ("/", "%"):
+            if бу == 0:
+                return None  # деление на ноль — пусть упадёт в рантайме
+            if uns:
+                д, о = divmod(ау, бу)
+            else:
+                ас, бс = self._знак64(ау), self._знак64(бу)
+                д = abs(ас) // abs(бс)
+                if (ас < 0) != (бс < 0):
+                    д = -д
+                о = ас - д * бс
+            return д if оп == "/" else о
+        if оп in _СРАВ_БУЛ:
+            х, у = (ау, бу) if uns else (self._знак64(ау), self._знак64(бу))
+            return int(
+                {
+                    "==": х == у,
+                    "!=": х != у,
+                    "<": х < у,
+                    "<=": х <= у,
+                    ">": х > у,
+                    ">=": х >= у,
+                }[оп]
+            )
+        return None
 
     def _бин(self, e: N.Бин) -> N.Тип:
         оп = e.оп
+        v = self._сверни(e)
+        if v is not None:
+            v &= self._МАСК64
+            if v >= 1 << 63:
+                v -= 1 << 64
+            self.e(f"ПЕР АКК, {v}")
+            if оп in _СРАВ_БУЛ or оп in ("и", "или", "в"):
+                return N.БУЛ
+            return self._тип_выр(e.лев)
         if оп == "и":
             конец = self._новая("иложь")
             self._выр(e.лев)
