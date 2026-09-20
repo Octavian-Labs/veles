@@ -82,10 +82,10 @@ jobs:
           cmp сам1.иск сам2.иск
           echo "фикс-поинт: два поколения выдали идентичную ИСКРУ"
 
-  # macOS (x86-64): на arm64-раннере бинари Mach-O x86_64 исполняет
-  # Rosetta 2 (входит в образ GitHub). Сиды — искра_мак, raz/разум_мак.
+  # macOS на Intel — x86_64 исполняется нативно, без Rosetta.
+  # Сиды — искра_мак, raz/разум_мак (Mach-O x86_64).
   macos:
-    runs-on: macos-14
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
 
