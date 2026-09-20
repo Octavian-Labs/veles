@@ -3,11 +3,14 @@
   "name": "ИСКРА",
   "scopeName": "source.iskra",
   "patterns": [
+    { "include": "#pragma" },
     { "include": "#comment" },
     { "include": "#string" },
+    { "include": "#gen-label" },
     { "include": "#label" },
     { "include": "#constant-def" },
     { "include": "#directive" },
+    { "include": "#pseudo" },
     { "include": "#sizeword" },
     { "include": "#mnemonic" },
     { "include": "#register" },
@@ -16,6 +19,31 @@
     { "include": "#operator" }
   ],
   "repository": {
+    "pragma": {
+      "patterns": [
+        {
+          "name": "meta.pragma.iskra",
+          "match": "^\\s*;\\s*(цель)\\s+(\\w+)",
+          "captures": {
+            "0": { "name": "comment.line.semicolon.iskra" },
+            "1": { "name": "keyword.control.directive.iskra" },
+            "2": { "name": "constant.language.iskra" }
+          }
+        }
+      ]
+    },
+    "gen-label": {
+      "patterns": [
+        {
+          "name": "meta.label.generated.iskra",
+          "match": "^\\s*(м_[A-Za-zА-Яа-яЁё0-9_]*)(\\s*:)",
+          "captures": {
+            "1": { "name": "entity.name.label.generated.iskra" },
+            "2": { "name": "keyword.operator.iskra" }
+          }
+        }
+      ]
+    },
     "comment": {
       "patterns": [
         {
@@ -77,8 +105,30 @@
     "directive": {
       "patterns": [
         {
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(СЕКЦИЯ)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_.]*)",
+          "captures": {
+            "1": { "name": "support.constant.iskra" },
+            "2": { "name": "entity.name.section.iskra" }
+          }
+        },
+        {
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(ИМПОРТ)\\s+\"([^\"]+)\"",
+          "captures": {
+            "1": { "name": "support.constant.iskra" },
+            "2": { "name": "entity.name.namespace.iskra" }
+          }
+        },
+        {
           "name": "support.constant.iskra",
           "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(СЕКЦИЯ|ИМПОРТ|ВХОД|ВЫРОВНЯТЬ|РЕЗЕРВ)(?![A-Za-zА-Яа-яЁё0-9_.])"
+        }
+      ]
+    },
+    "pseudo": {
+      "patterns": [
+        {
+          "name": "keyword.other.pseudo.iskra",
+          "match": "(?i)(?<![A-Za-zА-Яа-яЁё0-9_.])(ВХОДКАДРА|ВЫХОДКАДРА)(?![A-Za-zА-Яа-яЁё0-9_.])"
         }
       ]
     },
