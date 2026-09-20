@@ -13,6 +13,11 @@
     х := GetStdHandle(0xFFFFFFF5)   # STD_OUTPUT_HANDLE
     WriteFile(х, с.данные, с.длина как без32, &записано, пусто)
 
+функ печать_ош(с стр):
+    записано без32 = 0
+    х := GetStdHandle(0xFFFFFFF4)   # STD_ERROR_HANDLE
+    WriteFile(х, с.данные, с.длина как без32, &записано, пусто)
+
 функ печатьстр(с стр):
     печать(с)
     печать("\r\n")
