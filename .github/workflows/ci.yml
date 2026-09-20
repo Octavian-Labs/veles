@@ -30,10 +30,13 @@ jobs:
       - name: Build and run РАЗУМ example
         run: |
           python -m src.razum examples/привет.раз -o привет_разум.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
           ./привет_разум.exe
           python -m src.razum examples/вычисления.раз -o вычисления.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
           ./вычисления.exe
           if ($LASTEXITCODE -ne 55) { exit 1 }
+          exit 0
 
   linux:
     runs-on: ubuntu-latest
@@ -57,5 +60,7 @@ jobs:
       - name: Build and run РАЗУМ ELF example
         run: |
           python -m src.razum examples/выход_linux.раз --цель linux -o выход
-          chmod +x выход && ./выход
-          [ $? -eq 42 ]
+          chmod +x выход
+          код=0; ./выход || код=$?
+          echo "код выхода: $код"
+          [ "$код" -eq 42 ]
