@@ -6,14 +6,20 @@
     { "include": "#comment" },
     { "include": "#string" },
     { "include": "#char" },
+    { "include": "#iskra-block" },
+    { "include": "#module-use" },
     { "include": "#function-decl" },
     { "include": "#type-decl" },
     { "include": "#const-decl" },
     { "include": "#keyword" },
     { "include": "#type" },
     { "include": "#constant" },
+    { "include": "#module-chain" },
+    { "include": "#predicate-call" },
+    { "include": "#function-call" },
     { "include": "#builtin" },
     { "include": "#number" },
+    { "include": "#deprecated-op" },
     { "include": "#operator" }
   ],
   "repository": {
@@ -49,6 +55,35 @@
         {
           "name": "string.quoted.single.razum",
           "match": "'(?:\\\\x[0-9A-Fa-f]{2}|\\\\.|[^'\\\\])'"
+        }
+      ]
+    },
+    "iskra-block": {
+      "patterns": [
+        {
+          "name": "meta.embedded.iskra.razum",
+          "begin": "^(\\s*)(искра)(\\s*:)",
+          "beginCaptures": {
+            "2": { "name": "keyword.control.razum" },
+            "3": { "name": "punctuation.separator.razum" }
+          },
+          "end": "^(?!\\1[ \\t]|\\s*$)",
+          "patterns": [
+            { "include": "source.iskra" }
+          ]
+        }
+      ]
+    },
+    "module-use": {
+      "patterns": [
+        {
+          "name": "meta.import.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])(взять)(\\s+)((?:[A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*\\.)*[A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)(\\s*(?:,\\s*(?:[A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*\\.)*[A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)*)",
+          "captures": {
+            "1": { "name": "keyword.razum" },
+            "3": { "name": "entity.name.namespace.razum" },
+            "4": { "name": "entity.name.namespace.razum" }
+          }
         }
       ]
     },
@@ -116,7 +151,20 @@
       "patterns": [
         {
           "name": "storage.type.razum",
-          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(цел8|цел16|цел32|цел64|без8|без16|без32|без64|бул|сим|стр|д32|д64)(?![A-Za-zА-Яа-яЁё0-9_])"
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])(цел|нат|вещ)(\\.)(старт|шаг|рост|верх|пик)(?![A-Za-zА-Яа-яЁё0-9_.])",
+          "captures": {
+            "1": { "name": "storage.type.razum" },
+            "2": { "name": "punctuation.accessor.razum" },
+            "3": { "name": "storage.type.level.razum" }
+          }
+        },
+        {
+          "name": "storage.type.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])(лог|сим|стр|знак)(?![A-Za-zА-Яа-яЁё0-9_])"
+        },
+        {
+          "name": "invalid.deprecated.type.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])(цел8|цел16|цел32|цел64|без8|без16|без32|без64|бул|д32|д64)(?![A-Za-zА-Яа-яЁё0-9_])"
         }
       ]
     },
@@ -125,6 +173,45 @@
         {
           "name": "constant.language.razum",
           "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(да|нет|пусто)(?![A-Za-zА-Яа-яЁё0-9_])"
+        }
+      ]
+    },
+    "module-chain": {
+      "patterns": [
+        {
+          "name": "meta.namespace.call.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])((?:[A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*\\.)+)([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)(?=\\s*\\()",
+          "captures": {
+            "1": { "name": "entity.name.namespace.razum" },
+            "2": { "name": "entity.name.function.razum" }
+          }
+        },
+        {
+          "match": "([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)(\\.)(?=[A-Za-zА-Яа-яЁё_])",
+          "captures": {
+            "1": { "name": "entity.name.namespace.razum" },
+            "2": { "name": "punctuation.accessor.razum" }
+          }
+        },
+        {
+          "name": "variable.other.property.razum",
+          "match": "(?<=\\.)([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)(?!\\s*\\()"
+        }
+      ]
+    },
+    "predicate-call": {
+      "patterns": [
+        {
+          "name": "entity.name.function.predicate.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])(это_[A-Za-zА-Яа-яЁё0-9_]+|[A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*_это_[A-Za-zА-Яа-яЁё0-9_]+)(?=\\s*\\()"
+        }
+      ]
+    },
+    "function-call": {
+      "patterns": [
+        {
+          "name": "entity.name.function.razum",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_.])([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)(?=\\s*\\()"
         }
       ]
     },
@@ -156,11 +243,19 @@
         }
       ]
     },
+    "deprecated-op": {
+      "patterns": [
+        {
+          "name": "invalid.deprecated.razum",
+          "match": ":="
+        }
+      ]
+    },
     "operator": {
       "patterns": [
         {
           "name": "keyword.operator.razum",
-          "match": "\\.\\.=|<<=|>>=|\\.\\.|:=|==|!=|<=|>=|<<|>>|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|[-+*/%<>=()\\[\\]{},.:&|^!]"
+          "match": "\\.\\.=|<<=|>>=|\\.\\.|==|!=|<=|>=|<<|>>|\\+=|-=|\\*=|/=|%=|&=|\\|=|\\^=|[-+*/%<>=()\\[\\]{},.:&|^!]"
         }
       ]
     }
