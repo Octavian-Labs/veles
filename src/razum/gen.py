@@ -37,8 +37,9 @@ class _Контекст:
 class Генератор:
     """Преобразует программу РАЗУМА в текст ассемблера ИСКРА."""
 
-    def __init__(self, target: str = "windows"):
+    def __init__(self, target: str = "windows", опт: int = 1):
         self.target = target
+        self.опт = опт
         if target == "windows":
             self.арг_реги = ["СЧТ", "ДАН", "Р8", "Р9"]
             self.тень = 32
@@ -1578,7 +1579,7 @@ class Генератор:
             шапка.append(f'ИМПОРТ "{dll}" {", ".join(funcs)}')
         if self._есть_главная:
             шапка.append("ВХОД старт")
-        тело_текст = шапка + _пипхол(код_функций)
+        тело_текст = шапка + (_пипхол(код_функций) if self.опт > 0 else код_функций)
         if self.данные:
             тело_текст.append("СЕКЦИЯ данные")
             тело_текст += self.данные
@@ -1842,6 +1843,6 @@ def _пипхол(лини: list) -> list:
     return лини
 
 
-def generate(прог: N.Программа, target: str = "windows") -> str:
+def generate(прог: N.Программа, target: str = "windows", опт: int = 1) -> str:
     """AST -> текст ИСКРЫ."""
-    return Генератор(target).генерируй(прог)
+    return Генератор(target, опт).генерируй(прог)

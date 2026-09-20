@@ -35,6 +35,14 @@ def main(argv: list | None = None) -> int:
         action="store_true",
         help="только сгенерировать .иск, без ассемблирования",
     )
+    p.add_argument(
+        "-O",
+        dest="опт",
+        type=int,
+        choices=[0, 1],
+        default=1,
+        help="уровень оптимизации: 0=нет, 1=пипхол (по умолчанию 1)",
+    )
     args = p.parse_args(argv)
 
     src_path = Path(args.вход)
@@ -43,7 +51,7 @@ def main(argv: list | None = None) -> int:
         return 2
     try:
         прог = загрузить(src_path, target=args.цель)
-        искра = generate(прог, target=args.цель)
+        искра = generate(прог, target=args.цель, опт=args.опт)
     except RazError as e:
         print(f"разум: {e}", file=sys.stderr)
         return 1

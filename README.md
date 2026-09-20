@@ -26,6 +26,13 @@ python -m iskra ..\examples\привет.иск -o ..\examples\привет_ис
 
 # Linux-цель (ELF64)
 python -m razum ..\examples\выход_linux.раз --цель linux -o ..\выход
+
+# Уровни оптимизации: -O0 (без пипхола) / -O1 (по умолчанию)
+python -m razum ..\examples\привет.раз -O0 --только-иск
+
+# Самохост-цепочка (без Python): stdin → .иск → exe
+raz\разум.exe -O1 < examples\простые.раз > простые.иск
+искра.exe < простые.иск > простые.exe
 ```
 
 Пример на РАЗУМЕ (`examples/привет.раз`):
