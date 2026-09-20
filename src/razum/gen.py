@@ -1703,6 +1703,8 @@ class Генератор:
             raise RazError("программе нужна функция «главная»")
         # сборка текста
         шапка = ["; сгенерировано компилятором РАЗУМ", "СЕКЦИЯ код"]
+        if self.target == "linux":
+            шапка.insert(0, ";цель linux")
         for dll, funcs in self.импорты.items():
             шапка.append(f'ИМПОРТ "{dll}" {", ".join(funcs)}')
         if self._есть_главная:

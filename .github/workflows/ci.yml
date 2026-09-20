@@ -1,4 +1,4 @@
-# CI: автопроверки и реальный запуск собранных бинарников
+# CI: автопроверки и сборка примеров родным toolchain (разум + искра)
 name: CI Checks
 
 on:
@@ -23,20 +23,20 @@ jobs:
           python -m black --check src tests
           python -m flake8 src tests
           python -m pytest tests
-      - name: Build and run PE example
+      - name: Build and run with native toolchain
+        # бинарный вывод — только через cmd (pwsh перенаправляет как текст)
+        shell: cmd
         run: |
-          python -m src.iskra examples/привет.иск -o привет.exe
-          ./привет.exe
-      - name: Build and run РАЗУМ example
-        run: |
-          python -m src.razum examples/привет.раз -o привет_разум.exe
-          if ($LASTEXITCODE -ne 0) { exit 1 }
-          ./привет_разум.exe
-          python -m src.razum examples/вычисления.раз -o вычисления.exe
-          if ($LASTEXITCODE -ne 0) { exit 1 }
-          ./вычисления.exe
-          if ($LASTEXITCODE -ne 55) { exit 1 }
-          exit 0
+          искра.exe < examples\привет.иск > привет.exe
+          привет.exe
+          raz\разум.exe < examples\привет.раз > привет_разум.иск
+          искра.exe < привет_разум.иск > привет_разум.exe
+          привет_разум.exe
+          raz\разум.exe < examples\вычисления.раз > вычисления.иск
+          искра.exe < вычисления.иск > вычисления.exe
+          вычисления.exe
+          if %ERRORLEVEL% NEQ 55 exit /b 1
+          exit /b 0
 
   linux:
     runs-on: ubuntu-latest
@@ -53,13 +53,13 @@ jobs:
           python -m black --check src tests
           python -m flake8 src tests
           python -m pytest tests
-      - name: Build and run ELF example
+      - name: Build and run with native toolchain
         run: |
-          python -m src.iskra examples/привет_linux.иск --цель linux -o привет
+          chmod +x искра.elf raz/разум.elf
+          ./искра.elf < examples/привет_linux.иск > привет
           chmod +x привет && ./привет
-      - name: Build and run РАЗУМ ELF example
-        run: |
-          python -m src.razum examples/выход_linux.раз --цель linux -o выход
+          ./raz/разум.elf --цель linux < examples/выход_linux.раз > выход.иск
+          ./искра.elf < выход.иск > выход
           chmod +x выход
           код=0; ./выход || код=$?
           echo "код выхода: $код"
