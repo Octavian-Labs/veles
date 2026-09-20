@@ -20,8 +20,8 @@ jobs:
       # юникодные пути (кириллица), а cmd делает байтовое перенаправление.
       - name: Проверка сид-бинарников (MZ)
         run: |
-          if ((Get-Content искра.exe -Encoding Byte -TotalCount 2) -join ',') -ne '77,90' { throw "искра.exe не PE" }
-          if ((Get-Content raz\разум.exe -Encoding Byte -TotalCount 2) -join ',') -ne '77,90' { throw "разум.exe не PE" }
+          if (([IO.File]::ReadAllBytes("$PWD\искра.exe")[0..1] -join ',') -ne '77,90') { throw "искра.exe не PE" }
+          if (([IO.File]::ReadAllBytes("$PWD\raz\разум.exe")[0..1] -join ',') -ne '77,90') { throw "разум.exe не PE" }
 
       - name: искра собирает привет.иск
         run: |
@@ -79,9 +79,9 @@ jobs:
           ./искра.elf < выход.иск > выход
           od -A x -t x1 -N 4 выход | grep -q "7f 45 4c 46"
           chmod +x выход
-          код=0; ./выход || код=$?
-          echo "код выхода: $код"
-          [ "$код" -eq 42 ]
+          rc=0; ./выход || rc=$?
+          echo "код выхода: $rc"
+          [ "$rc" -eq 42 ]
 
       - name: Фикс-поинт самосборки
         run: |
