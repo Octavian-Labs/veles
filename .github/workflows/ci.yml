@@ -50,6 +50,7 @@ jobs:
           if (-not (Select-String -Path режим_ош.txt -Pattern "неизвестный режим" -SimpleMatch -Quiet)) { throw "нет диагностики режима" }
           cmd /c "raz\разум.exe --режим быстро < тесты\лог\если_число.раз > лог_быс.txt"
           if ($LASTEXITCODE -eq 0) { throw "быстро: если 5 ошибочно принято" }
+          exit 0
 
       - name: Границы массивов — надёжно ловит, быстро не генерирует
         run: |
@@ -81,6 +82,7 @@ jobs:
           cmd /c "искра.exe < с_ок.иск > с_ок.exe"
           cmd /c "с_ок.exe"
           if ($LASTEXITCODE -ne 42) { throw "легальные срезы: код $LASTEXITCODE вместо 42" }
+          exit 0
 
       - name: Границы строк — индекс 101, стр_срез 102, быстро без проверок
         run: |
@@ -100,6 +102,7 @@ jobs:
           cmd /c "искра.exe < т_ок.иск > т_ок.exe"
           cmd /c "т_ок.exe"
           if ($LASTEXITCODE -ne 42) { throw "легальные строки: код $LASTEXITCODE вместо 42" }
+          exit 0
 
       - name: Сбои — диагностика 101/103 и точка СЛЕДа на обработчике
         run: |
@@ -168,6 +171,7 @@ jobs:
           cmd /c "raz\разум.exe < тесты\типы\несовмест_знак.раз > т_нз.txt"
           if ($LASTEXITCODE -eq 0) { throw "размер=смещение принято без приведения" }
           if (-not (Select-String -Path т_нз.txt -Pattern "несовместимые" -Quiet)) { throw "нет диагностики несовместимости" }
+          exit 0
 
       - name: Видимость модулей — открыто/скрыто
         run: |
@@ -178,6 +182,7 @@ jobs:
           cmd /c "raz\разум.exe < тесты\модули\ошибка_скрытая_функ.раз > т_скр.txt"
           if ($LASTEXITCODE -eq 0) { throw "скрытая функция принята из чужого модуля" }
           if (-not (Select-String -Path т_скр.txt -Pattern "скрыто в модуле" -Quiet)) { throw "нет диагностики видимости" }
+          exit 0
 
       - name: Кэш интерфейсов .рми
         run: |
@@ -195,6 +200,7 @@ jobs:
           cmd /c "raz\разум.exe < тесты\модули\ошибка_кэш_скрытая.раз > т_кс.txt"
           if ($LASTEXITCODE -eq 0) { throw "скрытое имя кэшированного модуля принято" }
           if (-not (Select-String -Path т_кс.txt -Pattern "скрыто в модуле" -Quiet)) { throw "нет диагностики видимости из кэша" }
+          exit 0
 
       - name: Отметки стабильности биб
         run: |
