@@ -196,6 +196,11 @@ jobs:
           if ($LASTEXITCODE -eq 0) { throw "скрытое имя кэшированного модуля принято" }
           if (-not (Select-String -Path т_кс.txt -Pattern "скрыто в модуле" -Quiet)) { throw "нет диагностики видимости из кэша" }
 
+      - name: Отметки стабильности биб
+        run: |
+          $bad = Get-ChildItem биб -Recurse -Filter *.раз | Where-Object { -not ((Get-Content $_.FullName -TotalCount 3) -match ';(стабильно|развивается)') }
+          if ($bad) { throw "модули без отметки ;стабильно/;развивается: $($bad.Name)" }
+
       - name: Мигратор переведи — сборка
         run: |
           cmd /c "raz\разум.exe < переведи\переведи.раз > переведи\переведи.иск"
@@ -365,6 +370,10 @@ jobs:
           код=0; ./т_к2 || код=$?; [ $код -eq 41 ]
           if ./raz/разум --цель linux < тесты/модули/ошибка_кэш_скрытая.раз > т_кс.txt; then exit 1; fi
           grep -q "скрыто в модуле" т_кс.txt
+
+      - name: Отметки стабильности биб
+        run: |
+          for f in $(find биб -name '*.раз'); do head -3 "$f" | grep -qE ';(стабильно|развивается)' || { echo "нет отметки: $f"; exit 1; }; done
 
       - name: Мигратор переведи — сборка
         run: |
@@ -552,6 +561,10 @@ jobs:
           код=0; ./т_к2 || код=$?; [ $код -eq 41 ]
           if ./raz/разум_мак --цель macos < тесты/модули/ошибка_кэш_скрытая.раз > т_кс.txt; then exit 1; fi
           grep -q "скрыто в модуле" т_кс.txt
+
+      - name: Отметки стабильности биб
+        run: |
+          for f in $(find биб -name '*.раз'); do head -3 "$f" | grep -qE ';(стабильно|развивается)' || { echo "нет отметки: $f"; exit 1; }; done
 
       - name: смоук — процесс.запусти (fork/execve/wait4)
         run: |
