@@ -10,12 +10,12 @@
 
 функ печать(с стр):
     записано нат.рост = 0
-    х := GetStdHandle(0xFFFFFFF5)   # STD_OUTPUT_HANDLE
+    х нат.верх = GetStdHandle(0xFFFFFFF5)   # STD_OUTPUT_HANDLE
     WriteFile(х, с.данные, с.длина как нат.рост, &записано, пусто)
 
 функ печать_ош(с стр):
     записано нат.рост = 0
-    х := GetStdHandle(0xFFFFFFF4)   # STD_ERROR_HANDLE
+    х нат.верх = GetStdHandle(0xFFFFFFF4)   # STD_ERROR_HANDLE
     WriteFile(х, с.данные, с.длина как нат.рост, &записано, пусто)
 
 функ печатьстр(с стр):
@@ -30,12 +30,12 @@
 
 функ ввод() стр:
     # читает весь stdin до EOF порциями по 64 КиБ
-    х := GetStdHandle(0xFFFFFFF6)   # STD_INPUT_HANDLE
+    х нат.верх = GetStdHandle(0xFFFFFFF6)   # STD_INPUT_HANDLE
     б *Буфер = буф_новый()
     кусок *нат.старт = выдели(65536)
     прочитано нат.рост = 0
     пока да:
-        ок := ReadFile(х, кусок, 65536, &прочитано, пусто)
+        ок цел.рост = ReadFile(х, кусок, 65536, &прочитано, пусто)
         если ок == 0 или прочитано == 0:
             хватит
         буф_место(б, прочитано как нат.верх)
