@@ -99,10 +99,11 @@
         },
         {
           "name": "meta.function.razum",
-          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(функ)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(?:(открыто|скрыто)\\s+)?(функ)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
           "captures": {
             "1": { "name": "keyword.razum" },
-            "2": { "name": "entity.name.function.razum" }
+            "2": { "name": "keyword.razum" },
+            "3": { "name": "entity.name.function.razum" }
           }
         }
       ]
@@ -111,10 +112,11 @@
       "patterns": [
         {
           "name": "meta.type.declaration.razum",
-          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(запись|переч|тип)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(?:(открыто|скрыто)\\s+)?(запись|переч|тип)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
           "captures": {
             "1": { "name": "keyword.razum" },
-            "2": { "name": "entity.name.type.razum" }
+            "2": { "name": "keyword.razum" },
+            "3": { "name": "entity.name.type.razum" }
           }
         }
       ]
@@ -123,10 +125,11 @@
       "patterns": [
         {
           "name": "meta.constant.declaration.razum",
-          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(конст)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(?:(открыто|скрыто)\\s+)?(конст)\\s+([A-Za-zА-Яа-яЁё_][A-Za-zА-Яа-яЁё0-9_]*)",
           "captures": {
             "1": { "name": "keyword.razum" },
-            "2": { "name": "constant.other.razum" }
+            "2": { "name": "keyword.razum" },
+            "3": { "name": "constant.other.razum" }
           }
         }
       ]
@@ -139,7 +142,7 @@
         },
         {
           "name": "keyword.razum",
-          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(взять|внеш|функ|запись|переч|тип|конст|введи)(?![A-Za-zА-Яа-яЁё0-9_])"
+          "match": "(?<![A-Za-zА-Яа-яЁё0-9_])(взять|внеш|функ|запись|переч|тип|конст|введи|открыто|скрыто)(?![A-Za-zА-Яа-яЁё0-9_])"
         },
         {
           "name": "keyword.operator.razum",
