@@ -104,6 +104,13 @@ jobs:
           if ($LASTEXITCODE -ne 42) { throw "легальные строки: код $LASTEXITCODE вместо 42" }
           exit 0
 
+      - name: СЛЕД — сборка
+        run: |
+          Push-Location след
+          cmd /c "..\raz\разум.exe < след.раз > след.иск"
+          cmd /c "..\искра.exe < след.иск > след.exe"
+          Pop-Location
+
       - name: Сбои — диагностика 101/103 и точка СЛЕДа на обработчике
         run: |
           cmd /c "raz\разум.exe < тесты\границы\дин_чтение.раз > т_сб.иск"
