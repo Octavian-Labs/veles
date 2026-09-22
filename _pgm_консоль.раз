@@ -111,6 +111,7 @@
     если покажи("_seg_pred_square.pgm"): найдено += 1
     если покажи("_seg_pred_cross.pgm"): найдено += 1
     если покажи("_seg_pred_ring.pgm"): найдено += 1
+    если покажи("_seg_diff.pgm"): найдено += 1
     если найдено == 0:
         печатьстр("PGM files not found; run _segm30m.exe first")
         верни 1
