@@ -2,7 +2,7 @@
   "name": "veles-languages",
   "displayName": "ВЕЛЕС — ИСКРА/РАЗУМ/ЯР",
   "description": "Подсветка синтаксиса и сниппеты для языков экосистемы ВЕЛЕС: ИСКРА (.иск, русский ассемблер x86-64), РАЗУМ (.раз, системный язык), ЯР (.яр, флагманский язык).",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "veles",
   "main": "./extension.js",
   "engines": {
@@ -33,6 +33,16 @@
           "type": "string",
           "default": "",
           "description": "Путь к компилятору разум (разум.exe). Пусто — ищется raz/разум в корне рабочей области, затем PATH."
+        },
+        "veles.mlPath": {
+          "type": "string",
+          "default": "",
+          "description": "Путь к ML-инференсу ош_инф (Exp_AI_GPU/ош_инф.раз). Пусто — ищется raz/ош_инф в корне рабочей области."
+        },
+        "veles.mlWeights": {
+          "type": "string",
+          "default": "",
+          "description": "Путь к обученным весам ош_веса.bin (пишет обуч_ош.exe). Пусто — ищется raz/ош_веса.bin в корне рабочей области."
         }
       }
     },
@@ -40,6 +50,10 @@
       {
         "command": "veles.check",
         "title": "ВЕЛЕС: проверить файл разумом"
+      },
+      {
+        "command": "veles.ml",
+        "title": "ВЕЛЕС: угадать вид ошибки (ML)"
       }
     ],
     "languages": [

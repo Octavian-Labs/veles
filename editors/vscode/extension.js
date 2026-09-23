@@ -39,6 +39,80 @@ function норм(путьФайла) {
     return path.normalize(путьФайла).toLowerCase();
 }
 
+// путь к ML-инференсу (ош_инф): настройка veles.mlPath, затем
+// raz/ош_инф[.exe] в корне рабочей области, затем PATH.
+function путьИнф() {
+    const изНастроек = vscode.workspace.getConfiguration('veles').get('mlPath', '');
+    if (изНастроек !== '') {
+        return изНастроек;
+    }
+    const имя = process.platform === 'win32' ? 'ош_инф.exe' : 'ош_инф';
+    for (const папка of vscode.workspace.workspaceFolders || []) {
+        const кандидат = path.join(папка.uri.fsPath, 'raz', имя);
+        if (fs.existsSync(кандидат)) {
+            return кандидат;
+        }
+    }
+    return имя;
+}
+
+// путь к обученным весам: настройка veles.mlWeights, затем raz/ош_веса.bin.
+function путьВесов() {
+    const изНастроек = vscode.workspace.getConfiguration('veles').get('mlWeights', '');
+    if (изНастроек !== '') {
+        return изНастроек;
+    }
+    for (const папка of vscode.workspace.workspaceFolders || []) {
+        const кандидат = path.join(папка.uri.fsPath, 'raz', 'ош_веса.bin');
+        if (fs.existsSync(кандидат)) {
+            return кандидат;
+        }
+    }
+    return '';
+}
+
+// Один вызов ош_инф: stdin «строка кода\nсообщение\n», stdout «вид <имя>».
+// Возвращает имя класса (или пусто при отсутствии инструмента/весов).
+function млУгадай(лин, сооб, готово) {
+    const инф = путьИнф();
+    const веса = путьВесов();
+    if (веса === '' || !fs.existsSync(инф)) {
+        готово('');
+        return;
+    }
+    let вывод = '';
+    const процесс = cp.spawn(инф, [веса], { cwd: path.dirname(веса) });
+    процесс.stdout.on('data', (кусок) => { вывод += кусок.toString(); });
+    процесс.stderr.on('data', (кусок) => { вывод += кусок.toString(); });
+    процесс.on('error', () => готово(''));
+    процесс.on('close', () => {
+        const соот = вывод.match(/^вид (\S+)/m);
+        готово(соот ? соот[1] : '');
+    });
+    процесс.stdin.write(лин + '\n' + сооб + '\n');
+    процесс.stdin.end();
+}
+
+// строка исходника по uri и 1-based номеру (из открытого документа или диска)
+function строкаФайла(uri, номер) {
+    const открыт = vscode.workspace.textDocuments.find(
+        (док) => норм(док.uri.fsPath) === норм(uri.fsPath));
+    try {
+        if (открыт) {
+            return открыт.lineAt(Math.max(0, номер - 1)).text;
+        }
+        const строки = fs.readFileSync(uri.fsPath, 'utf8').split(/\r?\n/);
+        return строки[номер - 1] || '';
+    } catch (ош) {
+        return '';
+    }
+}
+
+// убирает префикс фазы «парсер: » — в корпусе хранился сырой текст сообщения
+function чистоеСообщение(текст) {
+    return текст.replace(/^[а-яёa-z]+: /, '');
+}
+
 // разбор вывода разума → диагностики по файлам
 function разбериВывод(вывод, документ, каталог) {
     const поФайлам = new Map();
@@ -128,6 +202,32 @@ function проверь(документ) {
             статус.text = 'ВЕЛЕС: чисто';
         } else {
             статус.text = 'ВЕЛЕС: ' + ошибок + ' диагн.';
+            // ML-подсказка: угадываем вид первой ошибки (ош_инф, сырые веса).
+            let цель = null;
+            for (const { uri, список } of поФайлам.values()) {
+                const первая = список.find(
+                    (д) => д.severity === vscode.DiagnosticSeverity.Error);
+                if (первая) {
+                    цель = { uri: uri, диаг: первая, список: список };
+                    break;
+                }
+            }
+            if (цель) {
+                const лин = строкаФайла(цель.uri, цель.диаг.range.start.line + 1);
+                млУгадай(лин, чистоеСообщение(цель.диаг.message), (вид) => {
+                    if (вид === '') {
+                        return;
+                    }
+                    const отмечен = new vscode.Diagnostic(цель.диаг.range,
+                        цель.диаг.message + '  [ML: ' + вид + ']', цель.диаг.severity);
+                    отмечен.source = цель.диаг.source;
+                    const новый = цель.список.map(
+                        (д) => д === цель.диаг ? отмечен : д);
+                    сборник.set(цель.uri, новый);
+                    статус.text = статус.text.replace(/ · ML.*$/, '')
+                        + ' · ML: ' + вид;
+                });
+            }
         }
     });
     процесс.stdin.write(документ.getText());
@@ -158,6 +258,32 @@ function activate(контекст) {
             if (ред) {
                 проверь(ред.document);
             }
+        }),
+        vscode.commands.registerCommand('veles.ml', () => {
+            const ред = vscode.window.activeTextEditor;
+            if (!ред) {
+                return;
+            }
+            const список = сборник.get(ред.document.uri) || [];
+            if (список.length === 0) {
+                vscode.window.showInformationMessage('ВЕЛЕС: диагностик нет');
+                return;
+            }
+            const строка = ред.selection.active.line;
+            const ближ = список.reduce((а, б) =>
+                Math.abs(б.range.start.line - строка) <
+                Math.abs(а.range.start.line - строка) ? б : а);
+            const лин = ред.document.lineAt(ближ.range.start.line).text;
+            млУгадай(лин, чистоеСообщение(ближ.message), (вид) => {
+                if (вид === '') {
+                    vscode.window.showInformationMessage(
+                        'ВЕЛЕС ML: ош_инф/ош_веса.bin не найдены ' +
+                        '(соберите Exp_AI_GPU/ош_инф.раз и обучите обуч_ош)');
+                } else {
+                    vscode.window.showInformationMessage(
+                        'ВЕЛЕС ML: вид ошибки — «' + вид + '»');
+                }
+            });
         })
     );
     for (const док of vscode.workspace.textDocuments) {
