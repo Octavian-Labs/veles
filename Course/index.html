@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>РАЗУМ — интерактивный учебник</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+    <div class="top-in">
+        <span class="logo">ВЕЛЕС<span class="logo-sep">/</span>РАЗУМ</span>
+        <span class="top-sub">интерактивный учебник</span>
+        <nav class="top-nav">
+            <a href="#sandbox" class="nav-link">Песочница</a>
+            <button id="btn-reset" class="ghost" title="Сбросить прогресс">Сбросить прогресс</button>
+        </nav>
+    </div>
+    <div class="progress"><div id="progress-bar" class="progress-bar"></div></div>
+</header>
+<div class="layout">
+    <aside class="side">
+        <div class="side-title">Шаги проекта</div>
+        <nav id="lesson-list" class="lesson-list"></nav>
+    </aside>
+    <main id="content" class="content"></main>
+</div>
+<footer class="foot">
+    Учебник по языку РАЗУМ экосистемы ВЕЛЕС · синтаксис сверен с
+    <code>docs/04-разум.md</code> и <code>docs/05-канон.md</code>
+</footer>
+<script src="razum-hl.js"></script>
+<script src="steps.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
