@@ -238,7 +238,7 @@ jobs:
           Write-Output "фикс-поинт: два поколения выдали идентичную ИСКРУ"
 
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -410,7 +410,7 @@ jobs:
       - name: Фикс-поинт — сборка поколения 2
         run: |
           cd raz
-          ../искра < сам1.иск > разум2
+          timeout 900 ../искра < сам1.иск > разум2
           chmod +x разум2
 
       - name: Фикс-поинт — поколение 2 и сверка
