@@ -223,6 +223,9 @@ Linux и macOS выполняют те же два поколения своим
 - Кириллица в консоли Windows ломается без UTF-8: перед командами с
   русскими путями/выводом выполнять
   `chcp 65001 > $null; [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false);`
+- После бампа версии расширения собирать артефакт:
+  `cd editors/vscode && vsce package --allow-missing-repository`
+  (vsce 4.x установлен глобально; vsix коммитим рядом с исходниками).
 - `gh` CLI не установлен; PR создавать через GitHub API, токен —
   пользовательская переменная окружения `GH_TOKEN`
   (curl `https://api.github.com/repos/Octavian-Labs/veles/pulls`
