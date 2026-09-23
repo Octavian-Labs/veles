@@ -220,6 +220,16 @@ Linux и macOS выполняют те же два поколения своим
   errno в `АКК` — проверка `ПЕРЕНОС`/`НЕПЕРЕНОС`, а не `АКК < 0`.
 - pwsh-шаг CI завершать `exit 0`, если последняя нативная команда —
   ожидаемо падающий тест: раннер дописывает `exit $LASTEXITCODE`.
+- Кириллица в консоли Windows ломается без UTF-8: перед командами с
+  русскими путями/выводом выполнять
+  `chcp 65001 > $null; [Console]::InputEncoding = [System.Text.UTF8Encoding]::new($false); [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false);`
+- После бампа версии расширения собирать артефакт:
+  `cd editors/vscode && vsce package --allow-missing-repository`
+  (vsce 4.x установлен глобально; vsix коммитим рядом с исходниками).
+- `gh` CLI не установлен; PR создавать через GitHub API, токен —
+  пользовательская переменная окружения `GH_TOKEN`
+  (curl `https://api.github.com/repos/Octavian-Labs/veles/pulls`
+  с заголовком `Authorization: Bearer $GH_TOKEN`).
 - `след/след.exe` и `переведи/переведи*` — артефакты сборки, в репозитории
   их нет; CI собирает их отдельными шагами до использования.
 - Перенаправление `разум ... > файл 2>&1` прячет ошибки компиляции
