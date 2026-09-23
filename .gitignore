@@ -40,5 +40,11 @@ raz/корпус_вых_*.txt
 raz/корпус.exe
 raz/корпус.иск
 raz/корпус_*.tsv
+raz/обуч_ош.exe
+raz/ош_инф.exe
+raz/ош_веса.bin
+raz/_*.иск
+raz/_*.txt
+raz/цели.txt
 raz/цели.txt
 raz/_к*.log
